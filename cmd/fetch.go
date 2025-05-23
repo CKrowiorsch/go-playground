@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"zeiterfassung/zeitfetch"
 
@@ -13,11 +14,23 @@ var FetchCmd = &cobra.Command{
 	Short: "Liest die aktuelle Zeit von einer Webseite aus",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if verbose {
+			log.Printf("Starte Zeitabfrage für URL: %s", args[0])
+		}
 		time, err := zeitfetch.FetchTimeFromWeb(args[0])
 		if err != nil {
-			fmt.Println("Fehler beim Auslesen der Zeit:", err)
+			if verbose {
+				log.Printf("Fehler beim Auslesen der Zeit: %v", err)
+			}
 			os.Exit(1)
+		}
+		if verbose {
+			log.Printf("Gefundene Zeit: %s", time)
 		}
 		fmt.Println("Gefundene Zeit:", time)
 	},
+}
+
+func init() {
+	FetchCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Aktiviere ausführliche Logausgabe")
 }
